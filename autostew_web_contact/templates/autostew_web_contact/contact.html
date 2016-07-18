@@ -1,0 +1,43 @@
+{% extends "autostew_web_home/base.html" %}
+
+{% block content %}
+    <h1 class="page-header">Send us your feedback</h1>
+    <form action="{% url 'contact:contact' %}" method="post">
+        {% csrf_token %}
+        <table class="table">
+            {{ form.as_table }}
+            <tr>
+                <td></td>
+                <td>
+                    <input type="submit">
+                </td>
+            </tr>
+        </table>
+    </form>
+    <h1>Credits</h1>
+    <h4>
+        Autostew developers
+    </h4>
+    <ul>
+        <li><a href="http://joanardiaca.net">Joan Ardiaca Jové a.k.a. blak</a></li>
+        <li>Sh4kE</li>
+    </ul>
+    <h4>
+        Very special thanks to
+    </h4>
+    <ul>
+        <li>Riccardo De Rosa for freely contributing the logo to Autostew.</li>
+        <li>All those who connected their dedicated servers. Without them this would not be possible.</li>
+    </ul>
+
+    <h4>
+        Special thanks to
+    </h4>
+    <ul>
+        <li>Erik Flowers and Lukas Bischoff for their <a href="https://erikflowers.github.io/weather-icons/">
+            bootstrap weather icons</a>.
+        </li>
+        <li>The uncountable FLOSS developers who indirectly helped make Autostew possible!</li>
+        <li>You, for your interest in this project!</li>
+    </ul>
+{% endblock %}

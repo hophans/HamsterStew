@@ -1,0 +1,43 @@
+{% extends "autostew_web_home/base.html" %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Sessions</h1>
+    </div>
+
+
+    <div class="row">
+
+        <div class="col-xs-12 col-md-6 placeholder">
+            <h2>Recent sessions</h2>
+            {% if sessions_history %}
+                <ul>
+                    {% for session in sessions_history %}
+                        <li>
+                            <a href="{{ session.server.get_absolute_url }}">{{ session.server }}</a>
+                            <a href="{{ session.get_absolute_url }}">{{ session }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No session history</p>
+            {% endif %}
+        </div>
+
+        <div class="col-xs-12 col-md-6 placeholder">
+            <h2>In progress</h2>
+            {% if sessions_in_progress %}
+                <ul>
+                    {% for session in sessions_in_progress %}
+                        <li>
+                            <a href="{{ session.server.get_absolute_url }}">{{ session.server }}</a>
+                            <a href="{{ session.get_absolute_url }}">{{ session }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No sessions in progress</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "autostew_web_home/base.html" %}
+
+{% block content %}
+
+    <h1 class="page-header">Hey {{ user.username }}</h1>
+
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                <strong>Please mind</strong>
+            </h3>
+        </div>
+        <div class="panel-body">
+            <p>
+                The setup queue and setup rotation will only have an effect if the <strong>controlGameSetup</strong>
+                option is set to <strong>true</strong> in your server.cfg!
+            </p>
+            <p>
+                Remember to restart your DS if you change this setting.
+            </p>
+        </div>
+    </div>
+
+    {% for server in servers %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    {% if not server.back_verified %}<span class="label label-danger">unverified</span>{% endif %}
+                    {{ server.name }}
+                </h3>
+            </div>
+            <div class="panel-body">
+                {% include 'autostew_web_session/server_badge.html' with server=server %}
+                <ul>
+                    <li>
+                        {% if server.back_kicks %}
+                            Kicking <b>enabled</b> <a class="btn btn-danger btn-sm" href="{% url 'account:toggle_kicks' server.id %}">Disable</a>
+                        {% else %}
+                            Kicking <b>disabled</b> <a class="btn btn-success btn-sm" href="{% url 'account:toggle_kicks' server.id %}">Enable</a>
+                        {% endif %}
+                    </li>
+                    <li>
+                        <form class="form-inline" method="post" action="{% url 'account:set_crash_points_limit' server.id %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="back_crash_points_limit">Crash points limit per stage</label>
+                                <input type="number" class="form-control input-sm" id="back_crash_points_limit" value="{{ server.back_crash_points_limit }}" name="back_crash_points_limit">
+                            </div>
+                            <button type="submit" class="btn btn-default btn-sm">Save</button>
+                        </form>
+                    </li>
+                    <li>
+                        <form class="form-inline" method="post" action="{% url 'account:set_custom_motd' server.id %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="back_custom_motd">Welcome message (one line!)</label>
+                                <input type="text" class="form-control input-sm" id="back_custom_motd" value="{{ server.back_custom_motd }}" name="back_custom_motd">
+                            </div>
+                            <button type="submit" class="btn btn-default btn-sm">Save</button>
+                        </form>
+                    </li>
+                </ul>
+                <a class="btn btn-default" href="{% url 'account:settings' server.id %}">
+                    Settings
+                </a>
+                <a class="btn btn-default" href="{% url 'account:rotation' server.id %}">
+                    Setup rotation
+                </a>
+                <a class="btn btn-default" href="{% url 'account:queue' server.id %}">
+                    Setup queue
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <p>You own no registered dedicated servers</p>
+    {% endfor %}
+    <a class="btn btn-default" href="{% url 'account:add' %}">
+        Connect your dedicated server to Autostew
+    </a>
+    <p>
+        Do you own a DS that is already connected but it does not show up in this list? Then
+        <a href='{% url 'contact:contact' %}'>contact us</a> specifying your DS name and the username you registered
+        with.
+    </p>
+{% endblock %}

@@ -1,0 +1,259 @@
+{% extends "autostew_web_home/base.html" %}
+{% load extra_filters %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12 col-md-4 placeholder">
+            <h3>
+                {% if parent.finished %}<span class="label label-success">finished</span>
+                {% elif parent.running %}<span class="label label-danger">in progress</span>
+                {% endif %}
+            </h3>
+
+            <h4>
+                {{ parent.setup_actual.track.name }}
+            </h4>
+
+            <h4>
+                {% if parent.setup_actual.get_vehicle_restriction %}
+                    {{ parent.setup_actual.get_vehicle_restriction }}
+                {% else %}
+                    Any car
+                {% endif %}
+            </h4>
+
+            <p>
+                Real time: {{ session.timestamp|date }} {{ session.timestamp|time }}<br>
+                In-game time (x{{ session.setup_actual.date_progression }}):
+                {{ session.current_year }}-{{ session.current_month }}-{{ session.current_day }}
+                {{ session.current_hour }}:{{ session.current_minute }}
+            </p>
+
+            <p>
+                {% if parent.setup_actual.weather_slots == 0 %}Real weather{% endif %}
+                <span style="font-size: xx-large">
+                    {% if parent.setup_actual.weather_slots > 0 %}{{ parent.setup_actual.weather_1.get_icon_or_name|safe }}{% endif %}
+                    {% if parent.setup_actual.weather_slots > 1 %}{{ parent.setup_actual.weather_2.get_icon_or_name|safe }}{% endif %}
+                    {% if parent.setup_actual.weather_slots > 2 %}{{ parent.setup_actual.weather_3.get_icon_or_name|safe }}{% endif %}
+                    {% if parent.setup_actual.weather_slots > 3 %}{{ parent.setup_actual.weather_4.get_icon_or_name|safe }}{% endif %}
+                </span>
+                (x{{ parent.setup_actual.weather_progression }})
+            </p>
+            <p>
+                <i class="wi wi-thermometer" title="Ambient temperature"></i> {{ session.temperature_ambient|temp }} ºC |
+                <span class="glyphicon glyphicon-road" title="Track temperature"></span> {{ session.temperature_track|temp }} ºC |
+                <i class="wi wi-barometer" title="Air pressure"></i> {{ session.air_pressure|pressure }} hPa
+                <br>
+                Track wetness: {{ session.wetness_avg|percent }}%
+            </p>
+        </div>
+        <div class="col-xs-12 col-md-4 placeholder" style="text-align: center">
+            <h2>
+                {{ session.get_nice_state|upper }}
+            </h2>
+
+            {% if session == parent and session.running %}
+                <script>var autorefresh = setTimeout(function () { location.reload(1); }, 10000);</script>
+                <p><button class="btn btn-default" onclick="clearTimeout(autorefresh)">
+                    <span class="glyphicon glyphicon-pause"></span> refresh
+                </button></p>
+            {% endif %}
+            {% include 'autostew_web_session/server_badge.html' with server=session.server %}
+
+            <h3>
+                {% if session.previous_in_session %}
+                    <a class="btn btn-default" href="{% url 'session:snapshot' session.previous_in_session.id %}">
+                        <span class="glyphicon glyphicon-triangle-left" aria-hidden="true"></span>
+                    </a>
+                {% else %}
+                    <a class="btn btn-default disabled" href="#">
+                        <span class="glyphicon glyphicon-triangle-left" aria-hidden="true"></span>
+                    </a>
+                {% endif %}
+                Navigate
+                {% if session.next_in_session %}
+                    <a class="btn btn-default" href="{% url 'session:snapshot' session.next_in_session.id %}">
+                        <span class="glyphicon glyphicon-triangle-right" aria-hidden="true"></span>
+                    </a>
+                {% else %}
+                    <a class="btn btn-default disabled" href="#">
+                        <span class="glyphicon glyphicon-triangle-right" aria-hidden="true"></span>
+                    </a>
+                {% endif %}
+            </h3>
+
+            {% if parent.setup_actual.practice1_length %}{{ parent.setup_actual.practice1_length }} minutes practice<br>{% endif %}
+            {% if parent.setup_actual.practice2_length %}{{ parent.setup_actual.practice2_length }} minutes practice<br>{% endif %}
+            {% if parent.setup_actual.qualify_length %}{{ parent.setup_actual.qualify_length }} minutes qualifying<br>{% endif %}
+            {% if parent.setup_actual.warmup_length %}{{ parent.setup_actual.warmup_length }} minutes warmup<br>{% endif %}
+            <b>{{ parent.setup_actual.race1_length }} {{ parent.setup_actual.get_race_length_unit }} race</b><br>
+            {% if parent.setup_actual.enforced_pitstop %}Mandatory pitstop{% endif %}
+
+            <p>
+                {% include 'autostew_web_session/session_detail_lap_selector.html' with session=parent %}
+
+                <a class="btn btn-{% if session.parent %}default{% else %}primary{% endif %}"
+                   href="{% if session.parent %}{% url 'session:session' session.parent_id %}{% else %}#{% endif %}">
+                    Latest
+                </a>
+            </p>
+        </div>
+        <div class="col-xs-12 col-md-4 placeholder" style="text-align: center">
+
+            <h3>Settings</h3>
+            <p>
+                {% if parent.setup_actual.rolling_starts %}Rolling start<br>{% endif %}
+                {{ parent.setup_actual.damage.name|title }} damage<br>
+                {{ parent.setup_actual.tire_wear.name|title }} tire wear<br>
+                {{ parent.setup_actual.fuel_usage.name|title }} fuel usage<br>
+                {{ parent.setup_actual.penalties.name|title }} penalties<br>
+                {{ parent.setup_actual.allowed_views.name|title }} view
+            </p>
+
+            <p>
+                <span class="label label-{% if parent.setup_actual.allow_custom_vehicle_setup %}success{% else %}danger{% endif %}">Custom car setups</span>
+                {% if parent.setup_actual.force_realistic_driving_aids %}
+                    <span class="label label-warning">ABS</span>
+                    <span class="label label-warning">SC</span>
+                    <span class="label label-warning">TCS</span>
+                {% else %}
+                    <span class="label label-{% if parent.setup_actual.abs_allowed %}success{% else %}danger{% endif %}">ABS</span>
+                    <span class="label label-{% if parent.setup_actual.sc_allowed %}success{% else %}danger{% endif %}">SC</span>
+                    <span class="label label-{% if parent.setup_actual.tcs_allowed %}success{% else %}danger{% endif %}">TCS</span>
+                {% endif %}
+
+                <span class="label label-{% if parent.setup_actual.force_manual %}danger{% else %}success{% endif %}">Automatic transm.</span>
+                <span class="label label-{% if parent.setup_actual.mechanical_failures %}success{% else %}danger{% endif %}">Mechanical failures</span>
+                <span class="label label-{% if parent.setup_actual.auto_start_engine %}success{% else %}danger{% endif %}">Auto engine start</span>
+                <span class="label label-{% if parent.setup_actual.ghost_griefers %}success{% else %}danger{% endif %}">Ghost griefers</span>
+            </p>
+
+            <p>
+                <a href="{{ parent.setup_actual.get_absolute_url }}" class="btn btn-default">
+                    Setup: {{ parent.setup_actual.name }}
+                </a>
+                <a href="{{ parent.setup_actual.get_track_url }}" class="btn btn-default">
+                    Leaderboard
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-condensed">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Lap</th>
+                    <th>Last lap</th>
+                    <th>Best lap</th>
+                    <th>Gap</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            {% for participant in session.get_connected_participants %}
+                <tr>
+                    <td style="white-space: nowrap; width: 1%;">
+                        <div style="font-size: 220%; float: left; clear: left; padding-right: 15px">
+                            P{{ participant.race_position }}
+                            <a href="{{ participant.get_absolute_url }}">
+                                <span class="glyphicon glyphicon-list-alt" aria-hidden="true" title="To race results"></span>
+                            </a>
+                            {% if participant.is_player %}
+                                <a href="{{ participant.member.steam_user.get_absolute_url }}">
+                                    <span class="glyphicon glyphicon-user" aria-hidden="true" title="To profile"></span>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <b>{{ participant.name }}</b>
+                        {% if participant.is_player %}
+                            {% include 'autostew_web_users/safetyclass_label.html' with safetyclass=participant.member.steam_user.safety_class %}
+                        {% endif %}
+                        <br>
+                        {% if not participant.is_player %}
+                            <span class="label label-default">
+                                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                {{ parent.setup_actual.opponent_difficulty }}
+                            </span>
+                        {% else %}
+                            {% if participant.member.steam_user.elo_rating %}
+                                <span class="label label-default">{{ participant.member.steam_user.elo_rating }}</span>
+                            {% endif %}
+                        {% endif %}
+                        &nbsp;
+                        {{ participant.vehicle.name }}
+                    </td>
+                    <td>
+                        {{ participant.current_lap }}
+                    </td>
+                    <td>
+                        {% if participant.last_lap_time %}
+
+                            <span class="
+                                {% if participant.last_lap_is_fastest_in_race %}
+                                    label label-success
+                                {% elif participant.last_lap_is_fastest_in_shapshot %}
+                                    label label-default
+                                {% endif %}
+                            ">{{ participant.last_lap_time|milli_to_nicetime }}</span>
+                        {% else %}
+                            ---
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if participant.fastest_lap_time %}
+                            <span class="
+                                {% if participant.fastest_lap_is_fastest_in_race %}
+                                    label label-primary
+                                {% endif %}
+                            ">{{ participant.fastest_lap_time|milli_to_nicetime }}</span>
+                        {% else %}
+                            ---
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ participant.gap|milli_to_nicetime }}
+                    </td>
+                    <td>
+                        {% if participant.still_connected %}
+                            <span class="
+                                {% if participant.state.in_race %}
+                                    label label-primary
+                                {% else %}
+                                    label label-danger
+                                {% endif %}
+                            ">{{ participant.state.name }}</span>
+                        {% else %}
+                            <span class="label label-danger">{{ participant.member.leaving_reason.name }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            <tfoot>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Lap</th>
+                    <th>Last lap</th>
+                    <th>Best lap</th>
+                    <th>Gap</th>
+                    <th>Status</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <p>
+        Disconnected participants:
+        {% for participant in parent.get_disconnected_participants %}
+            {{ participant.name }} ({{ participant.member.leaving_reason.name }})
+        {% endfor %}
+    </p>
+
+    <p>
+        <a href="{% url 'session:events' parent.id %}">Events</a>
+    </p>
+{% endblock %}

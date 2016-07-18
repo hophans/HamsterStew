@@ -1,0 +1,103 @@
+{% extends "autostew_web_home/base.html" %}
+
+{% block content %}
+    {% if user.is_authenticated and user.is_staff and unread_messages %}
+        <div class="alert alert-info">
+            There are {{ unread_messages|length }} unread messages.
+        </div>
+    {% endif %}
+    {% if user.is_authenticated and user.is_staff and unverified_servers %}
+        <div class="alert alert-success">
+            There are {{ unverified_servers|length }} unverified servers.
+        </div>
+    {% endif %}
+
+    <h1 class="page-header">HamsterStew <small>making online racing HAMSTER!</small></h1>
+
+    <div class="row">
+        <div class="col-xs-12 col-md-8 placeholder">
+                     <p>
+                <b>HamsterStew allows for a better on-line race simulation experience.</b>
+            </p>
+
+            {% if servers_in_race %}
+                <h2>Current events</h2>
+                <div class="row">
+                    {% for server in servers_in_race %}
+                        <div class="col-xs-12 col-md-6 placeholder">
+                            {% include 'autostew_web_session/server_badge.html' with server=server %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if servers_online %}
+                <h2>Idle servers</h2>
+                <div class="row">
+                    {% for server in servers_online %}
+                        <div class="col-xs-12 col-md-6 placeholder">
+                            {% include 'autostew_web_session/server_badge.html' with server=server %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <h3>
+                Features you can enjoy today!
+            </h3>
+            <ul>
+                <li>Warns and kicks players who crash excessively.</li>
+                <li>Rank players according to their safety record and their race performance.</li>
+                <li>Announces the best laps and other important events during the race.</li>
+                <li>Leaderboards with the fastest times.</li>
+                <li>Saves race's results.</li>
+                <li>Allows planning of races.</li>
+                <li>Connect your own dedicated server to HamsterStew.</li>
+                <li>Managing of dedicated server through the web interface.</li>
+            </ul>
+
+        </div>
+        <div class="col-xs-12 col-md-4 placeholder">
+            <h3>Announcements</h3>
+           <h4>New and improved HamsterStew <br><small>2016-07-10</small></h4>
+            <p>
+               The Front and Back end have been updated the be able to handle new features.<br>
+               It will now be possible to set a rating requirement to join a server. Also the DS admin page is in the working.
+            </p>
+<hr>
+ <h4>Performance testing on the way <br><small>2016-07-09</small></h4>
+            <p>
+		There wil start to be some performance testing to ensure that server hardware and bandwidth is able to handle large amounts of sessions.
+		This should have no effect on the servers connected to HamsterStew but any performance feedback is most welcome
+            </p>
+<hr>
+            <h4>Euro Sim Racers Hamster Race Steward in testing <small>2016-07-05</small></h4>
+            <p>
+                <a href="http://poop.dk:4040/user/safety_classes">Ratings.</a> - It is on a very experimental base so ratings
+		are subject to change or reset. No kicking will be applied from HamsterStew.
+            </p>
+<hr>
+		<p>
+<center>HamsterStew is Run and maintained by Euro Sim Racers<br>
+		<a href=http://eurosimracers.enjin.com target=_blank><img src=http://poop.dk/esr.logo5.png height="84" width="238"></a></center>
+		</p>
+<hr>
+		<p><center>Donate to HamsterStew maintenance<br>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+">
+<input type="image" src="https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal – The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+
+</center>
+
+		</p>
+		
+        </div>
+    </div>
+    <p>
+        <br>Send us <a href="{% url 'contact:contact' %}">your feedback</a>!
+    </p>
+{% endblock %}
