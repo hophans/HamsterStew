@@ -3,3 +3,7 @@
 Autostew - autosteward and improved online experience for Project Cars. http://autostew.net
 
 # Task board
+
+Test auto connect
+Improve timing convertion
+Add gap display for race sessions
